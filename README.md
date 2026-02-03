@@ -4,7 +4,7 @@ Safe, version-aware monkey patching for Ruby modules and classes. MonkeyBars
 gives you a structured DSL to add or override methods and constants while
 verifying the target's version and validating method arity.
 
-## Why this exists
+## But... why?
 
 Monkey patching is sometimes necessary, but it is easy to get wrong. This gem
 adds guardrails so patches fail loudly when:
