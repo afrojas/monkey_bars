@@ -21,34 +21,18 @@ Gem::Specification.new do |spec|
   spec.metadata["documentation_uri"] = "https://rubydoc.info/gems/monkey_bars"
   spec.metadata["rubygems_mfa_required"] = "true"
 
-  gemspec = File.basename(__FILE__)
-  excluded_prefixes = %w[
-    bin/ test/ spec/ features/
-    .git .github appveyor
-    .dockerignore .rspec .tool-versions
-    Dockerfile docker-compose.yml Gemfile Rakefile
-  ].freeze
-
-  files =
-    begin
-      IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
-        ls.readlines("\x0", chomp: true).reject do |f|
-          (f == gemspec) || f.start_with?(*excluded_prefixes)
-        end
-      end
-    rescue Errno::ENOENT
-      []
-    end
-
-  if files.empty?
-    files = Dir.chdir(__dir__) do
-      Dir.glob("**/*", File::FNM_DOTMATCH).select { |f| File.file?(f) }.reject do |f|
-        (f == ".") || (f == "..") || (f == gemspec) || f.start_with?(*excluded_prefixes)
-      end
-    end
-  end
-
-  spec.files = files
+  spec.files = %w[
+    CODE_OF_CONDUCT.md
+    CONTRIBUTING.md
+    LICENSE.txt
+    README.md
+    docs/llm-usage.md
+    lib/monkey_bars.rb
+    lib/monkey_bars/errors.rb
+    lib/monkey_bars/patch.rb
+    lib/monkey_bars/validation.rb
+    lib/monkey_bars/version.rb
+  ]
   spec.require_paths = ["lib"]
 
   # Development dependencies
