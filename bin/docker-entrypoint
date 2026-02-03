@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+# Install/update gems if Gemfile has changed
+bundle check || bundle install
+
+exec "$@"

@@ -1,0 +1,33 @@
+# Git
+.git
+.gitignore
+
+# GitHub
+.github
+
+# Documentation
+*.md
+!README.md
+
+# IDE/Editor
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Test artifacts
+coverage/
+.rspec_status
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Bundler
+.bundle
+vendor/bundle
+
+# Gem package files
+*.gem
+pkg/

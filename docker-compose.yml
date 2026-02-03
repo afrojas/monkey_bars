@@ -1,0 +1,42 @@
+services:
+  test-ruby-3.2:
+    build:
+      context: .
+      args:
+        RUBY_VERSION: "3.2"
+    volumes:
+      - .:/app
+      - bundle-3.2:/usr/local/bundle
+
+  test-ruby-3.3:
+    build:
+      context: .
+      args:
+        RUBY_VERSION: "3.3"
+    volumes:
+      - .:/app
+      - bundle-3.3:/usr/local/bundle
+
+  test-ruby-3.4:
+    build:
+      context: .
+      args:
+        RUBY_VERSION: "3.4"
+    volumes:
+      - .:/app
+      - bundle-3.4:/usr/local/bundle
+
+  test-ruby-4.0:
+    build:
+      context: .
+      args:
+        RUBY_VERSION: "4.0"
+    volumes:
+      - .:/app
+      - bundle-4.0:/usr/local/bundle
+
+volumes:
+  bundle-3.2:
+  bundle-3.3:
+  bundle-3.4:
+  bundle-4.0:

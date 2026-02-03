@@ -1,0 +1,33 @@
+# Bundler
+Gemfile.lock
+vendor/bundle/
+.bundle/
+
+# Gem build artifacts
+*.gem
+pkg/
+
+# RSpec
+.rspec_status
+
+# Coverage reports
+coverage/
+
+# Documentation
+doc/
+.yardoc/
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.cursor/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/

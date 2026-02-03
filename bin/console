@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+require "bundler/setup"
+require "monkey_bars"
+require "irb"
+IRB.start(__FILE__)

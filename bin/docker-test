@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+set -e
+
+RUBY_VERSIONS=("3.2" "3.3" "3.4" "4.0")
+
+usage() {
+  cat <<EOF
+Usage: $0 [OPTIONS] [VERSION...]
+
+Run tests in Docker for specified Ruby versions.
+
+Options:
+  -a, --all       Run tests for all supported Ruby versions
+  -b, --build     Force rebuild of Docker images
+  -l, --lint      Run StandardRB linter (uses Ruby 3.2)
+  -h, --help      Show this help message
+
+Arguments:
+  VERSION         Ruby version(s) to test (e.g., 3.2 3.3)
+                  If no version specified, defaults to 3.2
+
+Supported Ruby versions: ${RUBY_VERSIONS[*]}
+
+Examples:
+  $0                    # Run tests on Ruby 3.2 (default)
+  $0 3.3                # Run tests on Ruby 3.3
+  $0 3.2 3.4            # Run tests on Ruby 3.2 and 3.4
+  $0 --all              # Run tests on all supported versions
+  $0 --build 3.3        # Rebuild image and run tests on Ruby 3.3
+  $0 --lint             # Run linter
+EOF
+  exit 0
+}
+
+build_flag=""
+lint_mode=false
+run_all=false
+versions=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      usage
+      ;;
+    -a|--all)
+      run_all=true
+      shift
+      ;;
+    -b|--build)
+      build_flag="--build"
+      shift
+      ;;
+    -l|--lint)
+      lint_mode=true
+      shift
+      ;;
+    *)
+      versions+=("$1")
+      shift
+      ;;
+  esac
+done
+
+# Validate versions
+validate_version() {
+  local version=$1
+  for v in "${RUBY_VERSIONS[@]}"; do
+    if [[ "$v" == "$version" ]]; then
+      return 0
+    fi
+  done
+  echo "Error: Unsupported Ruby version '$version'"
+  echo "Supported versions: ${RUBY_VERSIONS[*]}"
+  exit 1
+}
+
+# Run linter
+if [[ "$lint_mode" == true ]]; then
+  echo "=== Running StandardRB linter (Ruby 3.2) ==="
+  docker compose run --rm $build_flag test-ruby-3.2 bundle exec standardrb
+  exit 0
+fi
+
+# Determine which versions to run
+if [[ "$run_all" == true ]]; then
+  versions=("${RUBY_VERSIONS[@]}")
+elif [[ ${#versions[@]} -eq 0 ]]; then
+  versions=("3.2")
+fi
+
+# Validate all specified versions
+for version in "${versions[@]}"; do
+  validate_version "$version"
+done
+
+# Run tests
+failed=()
+passed=()
+
+for version in "${versions[@]}"; do
+  echo ""
+  echo "========================================"
+  echo "  Testing with Ruby $version"
+  echo "========================================"
+  echo ""
+
+  if docker compose run --rm $build_flag "test-ruby-$version"; then
+    passed+=("$version")
+  else
+    failed+=("$version")
+  fi
+done
+
+# Summary
+echo ""
+echo "========================================"
+echo "  Test Summary"
+echo "========================================"
+
+if [[ ${#passed[@]} -gt 0 ]]; then
+  echo "  ✓ Passed: ${passed[*]}"
+fi
+
+if [[ ${#failed[@]} -gt 0 ]]; then
+  echo "  ✗ Failed: ${failed[*]}"
+  exit 1
+fi
+
+echo ""
+echo "All tests passed!"
