@@ -33,7 +33,9 @@ Gem::Specification.new do |spec|
     begin
       IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
         ls.readlines("\x0", chomp: true).reject do |f|
-          (f == gemspec) || f.start_with?(*excluded_prefixes)
+          (f == gemspec) ||
+            (f == "docs/monkey_bars_patch_for_readme.png") ||
+            f.start_with?(*excluded_prefixes)
         end
       end
     rescue Errno::ENOENT
@@ -43,7 +45,11 @@ Gem::Specification.new do |spec|
   if files.empty?
     files = Dir.chdir(__dir__) do
       Dir.glob("**/*", File::FNM_DOTMATCH).select { |f| File.file?(f) }.reject do |f|
-        (f == ".") || (f == "..") || (f == gemspec) || f.start_with?(*excluded_prefixes)
+        (f == ".") ||
+          (f == "..") ||
+          (f == gemspec) ||
+          (f == "docs/monkey_bars_patch_for_readme.png") ||
+          f.start_with?(*excluded_prefixes)
       end
     end
   end
