@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/monkey_bars_patch_for_readme.png" alt="MonkeyBars patch n' play logo">
+</p>
+
 # MonkeyBars
 
 Safe, version-aware monkey patching for Ruby modules and classes. MonkeyBars
