@@ -107,7 +107,7 @@ module MonkeyBars
         superclass.singleton_method(calling_method_name).call(*args, **kwargs)
       else
         # For instance methods
-        unless self.class.superclass&.instance_methods&.include?(calling_method_name.to_sym)
+        unless self.class.superclass&.method_defined?(calling_method_name.to_sym)
           raise(NoMethodError, "undefined method `#{calling_method_name}' for class `#{self.class.superclass}'")
         end
         self.class.superclass.instance_method(calling_method_name).bind_call(self, *args, **kwargs)

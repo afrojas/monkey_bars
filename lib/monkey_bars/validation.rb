@@ -34,7 +34,7 @@ module MonkeyBars
         preexisting_instance_method => {block:, ignore_arity_errors:, include_super_super:}
         module_to_prepend.module_eval(&block)
         module_to_prepend.instance_methods.each do |method_name|
-          unless @monkey.instance_methods.include?(method_name)
+          unless @monkey.method_defined?(method_name)
             raise(NoPatchableInstanceMethodFoundError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
           end
 
@@ -61,7 +61,7 @@ module MonkeyBars
         module_to_include = Module.new
         module_to_include.module_eval(&new_instance_methods_block)
         module_to_include.instance_methods.each do |method_name|
-          if @monkey.instance_methods.include?(method_name)
+          if @monkey.method_defined?(method_name)
             raise(NewInstanceMethodAlreadyExistsError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
           end
         end
@@ -80,7 +80,7 @@ module MonkeyBars
         preexisting_class_method => {block:, ignore_arity_errors:, include_super_super:}
         module_to_prepend.module_eval(&block)
         module_to_prepend.instance_methods.each do |method_name|
-          unless @monkey.singleton_class.instance_methods.include?(method_name)
+          unless @monkey.singleton_class.method_defined?(method_name)
             raise(NoPatchableClassMethodFoundError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
           end
 
@@ -107,7 +107,7 @@ module MonkeyBars
         module_to_include = Module.new
         module_to_include.module_eval(&new_class_methods_block)
         module_to_include.instance_methods.each do |method_name|
-          if @monkey.singleton_class.instance_methods.include?(method_name)
+          if @monkey.singleton_class.method_defined?(method_name)
             raise(NewClassMethodAlreadyExistsError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
           end
         end
