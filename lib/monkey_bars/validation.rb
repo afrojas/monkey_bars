@@ -34,7 +34,29 @@ module MonkeyBars
         preexisting_instance_method => {block:, ignore_arity_errors:, include_super_super:}
         module_to_prepend.module_eval(&block)
         module_to_prepend.instance_methods.each do |method_name|
+          if @monkey.private_method_defined?(method_name)
+            raise(PatchableInstanceMethodIsPrivateError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
+          end
+
           unless @monkey.method_defined?(method_name)
+            raise(NoPatchableInstanceMethodFoundError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
+          end
+
+          next if ignore_arity_errors
+
+          prepatched_method = @monkey.instance_method(method_name)
+          patched_method = module_to_prepend.instance_method(method_name)
+          if prepatched_method.arity != patched_method.arity
+            raise(MismatchedInstanceMethodArityError.new(@monkey_patcher_name, monkey: @monkey, method: method_name, prepatched_arity: prepatched_method.arity, patched_arity: patched_method.arity))
+          end
+        end
+
+        module_to_prepend.private_instance_methods.each do |method_name|
+          if @monkey.method_defined?(method_name)
+            raise(PatchableInstanceMethodIsNotPrivateError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
+          end
+
+          unless @monkey.private_method_defined?(method_name)
             raise(NoPatchableInstanceMethodFoundError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
           end
 
@@ -80,7 +102,29 @@ module MonkeyBars
         preexisting_class_method => {block:, ignore_arity_errors:, include_super_super:}
         module_to_prepend.module_eval(&block)
         module_to_prepend.instance_methods.each do |method_name|
+          if @monkey.singleton_class.private_method_defined?(method_name)
+            raise(PatchableClassMethodIsPrivateError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
+          end
+
           unless @monkey.singleton_class.method_defined?(method_name)
+            raise(NoPatchableClassMethodFoundError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
+          end
+
+          next if ignore_arity_errors
+
+          prepatched_method = @monkey.singleton_class.instance_method(method_name)
+          patched_method = module_to_prepend.instance_method(method_name)
+          if prepatched_method.arity != patched_method.arity
+            raise(MismatchedClassMethodArityError.new(@monkey_patcher_name, monkey: @monkey, method: method_name, prepatched_arity: prepatched_method.arity, patched_arity: patched_method.arity))
+          end
+        end
+
+        module_to_prepend.private_instance_methods.each do |method_name|
+          if @monkey.singleton_class.method_defined?(method_name)
+            raise(PatchableClassMethodIsNotPrivateError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
+          end
+
+          unless @monkey.singleton_class.private_method_defined?(method_name)
             raise(NoPatchableClassMethodFoundError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
           end
 
