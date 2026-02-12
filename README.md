@@ -96,6 +96,20 @@ You can call any of these helpers multiple times; MonkeyBars will combine them.
 This is helpful when you want to ignore some arity check errors (see below) for
 some methods but not others.
 
+When patching existing methods, visibility must match the target method. If the
+target is private, mark the patched method as private in the block. If the
+target is public/protected, do not mark it private in the patch.
+
+```ruby
+patch_instance_methods do
+  private
+
+  def internal_token
+    "#{super}-patched"
+  end
+end
+```
+
 ### Method arity checks
 
 When patching existing methods, arity must match by default. You can opt out:
@@ -209,6 +223,10 @@ MonkeyBars raises specific errors to keep patches safe and explicit:
 - `MonkeyBars::NoPatchableClassMethodFoundError`
 - `MonkeyBars::MismatchedInstanceMethodArityError`
 - `MonkeyBars::MismatchedClassMethodArityError`
+- `MonkeyBars::PatchableInstanceMethodIsPrivateError`
+- `MonkeyBars::PatchableInstanceMethodIsNotPrivateError`
+- `MonkeyBars::PatchableClassMethodIsPrivateError`
+- `MonkeyBars::PatchableClassMethodIsNotPrivateError`
 - `MonkeyBars::NewInstanceMethodAlreadyExistsError`
 - `MonkeyBars::NewClassMethodAlreadyExistsError`
 - `MonkeyBars::PatchConstantNotFoundError`

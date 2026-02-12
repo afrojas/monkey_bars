@@ -86,6 +86,10 @@ Overrides existing instance methods via `prepend`.
 - Error: `MonkeyBars::NoPatchableInstanceMethodFoundError` if method does not exist.
 - Error: `MonkeyBars::MismatchedInstanceMethodArityError` when arity differs,
   unless `ignore_arity_errors: true` is set.
+- Error: `MonkeyBars::PatchableInstanceMethodIsPrivateError` when the target
+  method is private but the patch method is defined as public/protected.
+- Error: `MonkeyBars::PatchableInstanceMethodIsNotPrivateError` when the target
+  method is public/protected but the patch method is marked `private`.
 - `include_super_super: true` makes `#super_super` available for these methods.
 
 #### `new_class_methods(&block)`
@@ -101,6 +105,10 @@ Overrides existing class methods via `singleton_class.prepend`.
 - Error: `MonkeyBars::NoPatchableClassMethodFoundError` if method does not exist.
 - Error: `MonkeyBars::MismatchedClassMethodArityError` when arity differs,
   unless `ignore_arity_errors: true` is set.
+- Error: `MonkeyBars::PatchableClassMethodIsPrivateError` when the target class
+  method is private but the patch method is defined as public/protected.
+- Error: `MonkeyBars::PatchableClassMethodIsNotPrivateError` when the target
+  class method is public/protected but the patch method is marked `private`.
 - `include_super_super: true` makes `#super_super` available for these methods.
 
 #### `patch_constants(&block)`
@@ -200,8 +208,19 @@ Use this section when the patch fails. The message usually suggests the fix.
   Update the version string or the version check.
 - `MonkeyBars::NoPatchableInstanceMethodFoundError`: method does not exist.
   Move it to `new_instance_methods` or fix the method name.
+- `MonkeyBars::PatchableInstanceMethodIsPrivateError`: target method is private
+  but patch method is public/protected. Mark the patch method as `private`.
+- `MonkeyBars::PatchableInstanceMethodIsNotPrivateError`: target method is
+  public/protected but patch method is private. Remove `private` in the patch
+  block or patch a private target.
 - `MonkeyBars::NoPatchableClassMethodFoundError`: method does not exist.
   Move it to `new_class_methods` or fix the method name.
+- `MonkeyBars::PatchableClassMethodIsPrivateError`: target class method is
+  private but patch method is public/protected. Mark the patch method as
+  `private`.
+- `MonkeyBars::PatchableClassMethodIsNotPrivateError`: target class method is
+  public/protected but patch method is private. Remove `private` in the patch
+  block or patch a private target.
 - `MonkeyBars::MismatchedInstanceMethodArityError`: arity differs.
   Match the signature or set `ignore_arity_errors: true`.
 - `MonkeyBars::MismatchedClassMethodArityError`: arity differs.
@@ -223,6 +242,7 @@ Use this section when the patch fails. The message usually suggests the fix.
 - Prefer `patch(...)` for immediate application unless delayed patching is required.
 - Use `patch_*` helpers for existing methods/constants and `new_*` for new ones.
 - Keep patched method arity identical to the original unless explicitly allowed.
+- Keep patched method visibility aligned with the target (`private` vs public/protected).
 - Add targeted tests around the patched behavior; avoid testing internal details.
 
 ## Testing checklist
