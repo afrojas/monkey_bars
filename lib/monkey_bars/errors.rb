@@ -73,6 +73,18 @@ module MonkeyBars
     end
   end
 
+  class PatchableClassMethodIsNotProtectedError < StandardError
+    def initialize(patcher_name, monkey: nil, method: nil)
+      super("[#{patcher_name}] The class method `.#{method}` on `#{monkey}` is not protected, but is on the patch. Remove it from `protected` in your patch.")
+    end
+  end
+
+  class PatchableClassMethodIsProtectedError < StandardError
+    def initialize(patcher_name, monkey: nil, method: nil)
+      super("[#{patcher_name}] The class method `.#{method}` on `#{monkey}` is protected, but isn't on the patch. Mark it as `protected` in your patch.")
+    end
+  end
+
   class PatchableInstanceMethodIsNotPrivateError < StandardError
     def initialize(patcher_name, monkey: nil, method: nil)
       super("[#{patcher_name}] The instance method `##{method}` on `#{monkey}` is not private, but is on the patch. Remove it from `private` in your patch.")
@@ -82,6 +94,18 @@ module MonkeyBars
   class PatchableInstanceMethodIsPrivateError < StandardError
     def initialize(patcher_name, monkey: nil, method: nil)
       super("[#{patcher_name}] The instance method `##{method}` on `#{monkey}` is private, but isn't on the patch. Mark it as `private` in your patch.")
+    end
+  end
+
+  class PatchableInstanceMethodIsNotProtectedError < StandardError
+    def initialize(patcher_name, monkey: nil, method: nil)
+      super("[#{patcher_name}] The instance method `##{method}` on `#{monkey}` is not protected, but is on the patch. Remove it from `protected` in your patch.")
+    end
+  end
+
+  class PatchableInstanceMethodIsProtectedError < StandardError
+    def initialize(patcher_name, monkey: nil, method: nil)
+      super("[#{patcher_name}] The instance method `##{method}` on `#{monkey}` is protected, but isn't on the patch. Mark it as `protected` in your patch.")
     end
   end
 

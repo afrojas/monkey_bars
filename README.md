@@ -96,9 +96,9 @@ You can call any of these helpers multiple times; MonkeyBars will combine them.
 This is helpful when you want to ignore some arity check errors (see below) for
 some methods but not others.
 
-When patching existing methods, visibility must match the target method. If the
-target is private, mark the patched method as private in the block. If the
-target is public/protected, do not mark it private in the patch.
+When patching existing methods, visibility must match the target method exactly.
+If the target is public, keep the patch method public. If the target is
+protected/private, mark the patch method as protected/private in the block.
 
 ```ruby
 patch_instance_methods do
@@ -107,6 +107,16 @@ patch_instance_methods do
   def internal_token
     "#{super}-patched"
   end
+end
+```
+
+```ruby
+patch_instance_methods do
+  def internal_token(*args)
+    super(*args)
+  end
+
+  protected :internal_token
 end
 ```
 
