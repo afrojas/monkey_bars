@@ -370,6 +370,18 @@ RSpec.describe MonkeyBars do
           def method_with_args(a, b)
             a + b
           end
+
+          protected
+
+          def protected_method_with_args(a, b)
+            "protected #{a + b}"
+          end
+
+          private
+
+          def private_method_with_args(a, b)
+            "private #{a + b}"
+          end
         end
       end
 
@@ -462,6 +474,124 @@ RSpec.describe MonkeyBars do
 
         expect(instance.method_with_args(1, 2, 3)).to eq(6)
       end
+
+      it "raises PatchableInstanceMethodIsPrivateError when private method is patched as public" do
+        monkey_bars = build_monkey_bars_class
+
+        monkey_bars.prepare_for_patching(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+          monkey_bars.patch_instance_methods do
+            def private_method_with_args(a, b)
+              "patched private #{a + b}"
+            end
+          end
+        end
+
+        expect { monkey_bars.patch! }.to raise_error(
+          MonkeyBars::PatchableInstanceMethodIsPrivateError,
+          /private_method_with_args/
+        )
+      end
+
+      it "raises PatchableInstanceMethodIsProtectedError when protected method is patched as public" do
+        monkey_bars = build_monkey_bars_class
+
+        monkey_bars.prepare_for_patching(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+          monkey_bars.patch_instance_methods do
+            def protected_method_with_args(a, b)
+              "patched protected #{a + b}"
+            end
+          end
+        end
+
+        expect { monkey_bars.patch! }.to raise_error(
+          MonkeyBars::PatchableInstanceMethodIsProtectedError,
+          /protected_method_with_args/
+        )
+      end
+
+      it "raises PatchableInstanceMethodIsNotPrivateError when public method is patched as private" do
+        monkey_bars = build_monkey_bars_class
+
+        monkey_bars.prepare_for_patching(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+          monkey_bars.patch_instance_methods do
+            def method_with_args(a, b)
+              "patched public #{a + b}"
+            end
+
+            private :method_with_args
+          end
+        end
+
+        expect { monkey_bars.patch! }.to raise_error(
+          MonkeyBars::PatchableInstanceMethodIsNotPrivateError,
+          /method_with_args/
+        )
+      end
+
+      it "raises PatchableInstanceMethodIsNotProtectedError when public method is patched as protected" do
+        monkey_bars = build_monkey_bars_class
+
+        monkey_bars.prepare_for_patching(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+          monkey_bars.patch_instance_methods do
+            def method_with_args(a, b)
+              "patched public #{a + b}"
+            end
+
+            protected :method_with_args
+          end
+        end
+
+        expect { monkey_bars.patch! }.to raise_error(
+          MonkeyBars::PatchableInstanceMethodIsNotProtectedError,
+          /method_with_args/
+        )
+      end
+
+      it "successfully patches private instance methods when visibility matches" do
+        monkey_bars = build_monkey_bars_class
+
+        expect {
+          monkey_bars.patch(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+            monkey_bars.patch_instance_methods do
+              def private_method_with_args(a, b)
+                "patched private #{a + b}"
+              end
+
+              private :private_method_with_args
+            end
+          end
+        }.not_to raise_error
+
+        mod = monkey
+        test_class = Class.new { include mod }
+        instance = test_class.new
+
+        expect { instance.private_method_with_args(1, 2) }.to raise_error(NoMethodError)
+        expect(instance.send(:private_method_with_args, 1, 2)).to eq("patched private 3")
+      end
+
+      it "successfully patches protected instance methods when visibility matches" do
+        monkey_bars = build_monkey_bars_class
+
+        expect {
+          monkey_bars.patch(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+            monkey_bars.patch_instance_methods do
+              def protected_method_with_args(a, b)
+                "patched protected #{a + b}"
+              end
+
+              protected :protected_method_with_args
+            end
+          end
+        }.not_to raise_error
+
+        mod = monkey
+        test_class = Class.new { include mod }
+        instance = test_class.new
+
+        expect { instance.protected_method_with_args(1, 2) }.to raise_error(NoMethodError)
+        expect(instance.send(:protected_method_with_args, 1, 2)).to eq("patched protected 3")
+      end
     end
   end
 
@@ -536,6 +666,20 @@ RSpec.describe MonkeyBars do
 
           def self.class_method_with_args(a, b)
             a + b
+          end
+
+          class << self
+            protected
+
+            def protected_class_method_with_args(a, b)
+              "protected class #{a + b}"
+            end
+
+            private
+
+            def private_class_method_with_args(a, b)
+              "private class #{a + b}"
+            end
           end
         end
       end
@@ -616,6 +760,116 @@ RSpec.describe MonkeyBars do
         }.not_to raise_error
 
         expect(monkey.class_method_with_args(1, 2, 3)).to eq(6)
+      end
+
+      it "raises PatchableClassMethodIsPrivateError when private class method is patched as public" do
+        monkey_bars = build_monkey_bars_class
+
+        monkey_bars.prepare_for_patching(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+          monkey_bars.patch_class_methods do
+            def private_class_method_with_args(a, b)
+              "patched private class #{a + b}"
+            end
+          end
+        end
+
+        expect { monkey_bars.patch! }.to raise_error(
+          MonkeyBars::PatchableClassMethodIsPrivateError,
+          /private_class_method_with_args/
+        )
+      end
+
+      it "raises PatchableClassMethodIsProtectedError when protected class method is patched as public" do
+        monkey_bars = build_monkey_bars_class
+
+        monkey_bars.prepare_for_patching(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+          monkey_bars.patch_class_methods do
+            def protected_class_method_with_args(a, b)
+              "patched protected class #{a + b}"
+            end
+          end
+        end
+
+        expect { monkey_bars.patch! }.to raise_error(
+          MonkeyBars::PatchableClassMethodIsProtectedError,
+          /protected_class_method_with_args/
+        )
+      end
+
+      it "raises PatchableClassMethodIsNotPrivateError when public class method is patched as private" do
+        monkey_bars = build_monkey_bars_class
+
+        monkey_bars.prepare_for_patching(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+          monkey_bars.patch_class_methods do
+            def class_method_with_args(a, b)
+              "patched public class #{a + b}"
+            end
+
+            private :class_method_with_args
+          end
+        end
+
+        expect { monkey_bars.patch! }.to raise_error(
+          MonkeyBars::PatchableClassMethodIsNotPrivateError,
+          /class_method_with_args/
+        )
+      end
+
+      it "raises PatchableClassMethodIsNotProtectedError when public class method is patched as protected" do
+        monkey_bars = build_monkey_bars_class
+
+        monkey_bars.prepare_for_patching(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+          monkey_bars.patch_class_methods do
+            def class_method_with_args(a, b)
+              "patched public class #{a + b}"
+            end
+
+            protected :class_method_with_args
+          end
+        end
+
+        expect { monkey_bars.patch! }.to raise_error(
+          MonkeyBars::PatchableClassMethodIsNotProtectedError,
+          /class_method_with_args/
+        )
+      end
+
+      it "successfully patches private class methods when visibility matches" do
+        monkey_bars = build_monkey_bars_class
+
+        expect {
+          monkey_bars.patch(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+            monkey_bars.patch_class_methods do
+              def private_class_method_with_args(a, b)
+                "patched private class #{a + b}"
+              end
+
+              private :private_class_method_with_args
+            end
+          end
+        }.not_to raise_error
+
+        expect { monkey.private_class_method_with_args(1, 2) }.to raise_error(NoMethodError)
+        expect(monkey.send(:private_class_method_with_args, 1, 2)).to eq("patched private class 3")
+      end
+
+      it "successfully patches protected class methods when visibility matches" do
+        monkey_bars = build_monkey_bars_class
+
+        expect {
+          monkey_bars.patch(monkey, version: "1.0.0", version_check: -> { monkey::VERSION }) do
+            monkey_bars.patch_class_methods do
+              def protected_class_method_with_args(a, b)
+                "patched protected class #{a + b}"
+              end
+
+              protected :protected_class_method_with_args
+            end
+          end
+        }.not_to raise_error
+
+        expect { monkey.protected_class_method_with_args(1, 2) }.to raise_error(NoMethodError)
+        expect(monkey.send(:protected_class_method_with_args, 1, 2)).to eq("patched protected class 3")
       end
     end
   end
