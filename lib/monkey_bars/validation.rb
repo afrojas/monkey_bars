@@ -34,7 +34,7 @@ module MonkeyBars
         preexisting_instance_method => {block:, ignore_arity_errors:, include_super_super:}
         module_to_prepend.module_eval(&block)
         module_to_prepend.instance_methods.each do |method_name|
-          next if module_to_prepend.protected_instance_methods.include?(method_name)
+          next if module_to_prepend.protected_method_defined?(method_name)
 
           if @monkey.protected_method_defined?(method_name)
             raise(PatchableInstanceMethodIsProtectedError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
@@ -126,7 +126,7 @@ module MonkeyBars
         preexisting_class_method => {block:, ignore_arity_errors:, include_super_super:}
         module_to_prepend.module_eval(&block)
         module_to_prepend.instance_methods.each do |method_name|
-          next if module_to_prepend.protected_instance_methods.include?(method_name)
+          next if module_to_prepend.protected_method_defined?(method_name)
 
           if @monkey.singleton_class.protected_method_defined?(method_name)
             raise(PatchableClassMethodIsProtectedError.new(@monkey_patcher_name, monkey: @monkey, method: method_name))
@@ -216,7 +216,7 @@ module MonkeyBars
         module_to_redefine = Module.new
         module_to_redefine.module_eval(&redefined_constant)
         module_to_redefine.constants(false).each do |const_name|
-          unless @monkey.constants(false).include?(const_name)
+          unless @monkey.const_defined?(const_name, false)
             raise(PatchConstantNotFoundError.new(@monkey_patcher_name, monkey: @monkey, constant: const_name))
           end
         end
@@ -233,7 +233,7 @@ module MonkeyBars
         module_to_include = Module.new
         module_to_include.module_eval(&new_constant)
         module_to_include.constants(false).each do |const_name|
-          if @monkey.constants(false).include?(const_name)
+          if @monkey.const_defined?(const_name, false)
             raise(NewConstantAlreadyExistsError.new(@monkey_patcher_name, monkey: @monkey, constant: const_name))
           end
         end
