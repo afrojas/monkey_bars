@@ -46,6 +46,8 @@ compares it with `version` using exact equality. Mismatches raise
 - `prepare_for_patching(...)` validates and stores the patch.
 - `patch!` applies a previously prepared patch and can only be called once.
 
+Calling `prepare_for_patching` more than once raises
+`MonkeyBars::PrepareForPatchingAlreadyPerformedError`.
 Calling `patch!` more than once raises `MonkeyBars::PatchAlreadyPerformedError`.
 
 ## API reference
@@ -273,6 +275,9 @@ Use this section when the patch fails. The message usually suggests the fix.
   Move it to `patch_constants`.
 - `MonkeyBars::PatchAlreadyPerformedError`: `patch!` was called twice.
   Ensure you only call `patch!` once per prepared patch.
+- `MonkeyBars::PrepareForPatchingAlreadyPerformedError`:
+  `prepare_for_patching` was called twice. Ensure you only prepare once per
+  patcher.
 
 ## Best practices for LLMs
 

@@ -31,6 +31,10 @@ module MonkeyBars
   alias_method :🐵, :patch
 
   def prepare_for_patching(monkey, version:, version_check:, patch_immediately: false, &block)
+    if @prepare_for_patching_performed
+      raise(PrepareForPatchingAlreadyPerformedError.new(@monkey_patcher_name))
+    end
+
     @monkey = monkey
     @version = version
     @version_check_block = version_check
@@ -38,6 +42,8 @@ module MonkeyBars
     yield if block_given?
 
     patch! if patch_immediately
+
+    @prepare_for_patching_performed = true
   end
 
   def patch!

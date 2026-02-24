@@ -120,4 +120,10 @@ module MonkeyBars
       super("[#{patcher_name}] Couldn't find constant `#{constant}` on `#{monkey}` despite it being marked as patchable. Perhaps move it to the `new_constants` block?")
     end
   end
+
+  class PrepareForPatchingAlreadyPerformedError < StandardError
+    def initialize(patcher_name)
+      super("[#{patcher_name}] `#prepare_for_patching` has already been called and cannot be called again")
+    end
+  end
 end

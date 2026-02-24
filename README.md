@@ -73,6 +73,7 @@ declared inside a block and then applied with `patch` (immediately) or
 - `patch!` applies a prepared patch
 
 If `patch!` runs without any methods or constants defined, it emits a warning.
+Calling `prepare_for_patching` or `patch!` more than once raises an error.
 
 The `monkey` can be:
 
@@ -242,6 +243,7 @@ MonkeyBars raises specific errors to keep patches safe and explicit:
 - `MonkeyBars::PatchConstantNotFoundError`
 - `MonkeyBars::NewConstantAlreadyExistsError`
 - `MonkeyBars::PatchAlreadyPerformedError`
+- `MonkeyBars::PrepareForPatchingAlreadyPerformedError`
 
 ## Development
 

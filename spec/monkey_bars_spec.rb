@@ -88,6 +88,19 @@ RSpec.describe MonkeyBars do
         expect(monkey.instance_methods).to include(:deferred_method)
       end
 
+      it "raises PrepareForPatchingAlreadyPerformedError when prepare_for_patching called twice" do
+        monkey_bars = build_monkey_bars_class
+
+        monkey_bars.prepare_for_patching(monkey, version: "1.0.0", version_check: -> { monkey::VERSION })
+
+        expect {
+          monkey_bars.prepare_for_patching(monkey, version: "1.0.0", version_check: -> { monkey::VERSION })
+        }.to raise_error(
+          MonkeyBars::PrepareForPatchingAlreadyPerformedError,
+          /already been called/
+        )
+      end
+
       it "raises PatchAlreadyPerformedError when patch! called twice" do
         monkey_bars = build_monkey_bars_class
 
